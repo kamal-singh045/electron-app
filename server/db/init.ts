@@ -1,21 +1,39 @@
 import Database from 'better-sqlite3';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { app } from 'electron';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const dbPath = path.join(__dirname, 'database.sqlite');
+let dbInstance: Database.Database | null = null;
 
-// Create/connect to database
-export const dbInstance = new Database(dbPath);
+// Get database instance (lazy initialization)
+export function getDbInstance(): Database.Database {
+  if (!dbInstance) {
+    // Use Electron's userData directory for the database
+    // This ensures the database is stored in a proper location
+    const dbPath = app.isPackaged 
+      ? path.join(app.getPath('userData'), 'database.sqlite')
+      : path.join(process.cwd(), 'server', 'db', 'database.sqlite');
 
-// Enable foreign keys
-dbInstance.pragma('foreign_keys = ON');
+    // Create/connect to database
+    dbInstance = new Database(dbPath);
+    
+    // Enable foreign keys
+    dbInstance.pragma('foreign_keys = ON');
+    
+    console.log(`✅ Database connected at: ${dbPath}`);
+  }
+  
+  return dbInstance;
+}
+
+// For backward compatibility
+export { dbInstance };
 
 // Initialize schema
 export function initializeDatabase() {
   try {
+    const db = getDbInstance();
     // Users table
-    dbInstance.exec(`
+    db.exec(`
       CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,

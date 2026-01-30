@@ -1,3 +1,4 @@
+import { Request } from 'express';
 export * from './auth.types';
 
 export interface ApiResponse<T> {
@@ -6,7 +7,6 @@ export interface ApiResponse<T> {
   data?: T
 }
 
-export interface HelloResponse {
-  message: string
-  timestamp: string
+export interface CustomRequest extends Request {
+  userId?: number;
 }

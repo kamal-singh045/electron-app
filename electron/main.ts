@@ -1,11 +1,7 @@
 import { app, BrowserWindow } from 'electron'
-// import { createRequire } from 'node:module'
-import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { startServer } from '../server/server'
-
-// const require = createRequire(import.meta.url)
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
+import { setupPermissions } from './permissions'
 
 // The built directory structure
 //
@@ -16,7 +12,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 // │ │ ├── main.js
 // │ │ └── preload.mjs
 // │
-process.env.APP_ROOT = path.join(__dirname, '..')
+// For development, use process.cwd(), for production use app.getAppPath()
+process.env.APP_ROOT = process.cwd()
 
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
 export const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
@@ -31,7 +28,7 @@ function createWindow() {
   win = new BrowserWindow({
     icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
     webPreferences: {
-      preload: path.join(__dirname, 'preload.mjs'),
+      preload: path.join(MAIN_DIST, 'preload.mjs'),
     },
   })
 
@@ -67,6 +64,9 @@ app.on('activate', () => {
 })
 
 app.whenReady().then(async () => {
+  // Setup permissions for camera and file access
+  setupPermissions()
+  
   // Start Express server before creating window
   await startServer()
   createWindow()
