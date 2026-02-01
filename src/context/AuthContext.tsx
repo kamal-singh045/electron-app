@@ -10,7 +10,7 @@ interface IUser {
   name: string;
   email: string;
   phone: string;
-  profileImage?: string;
+  profile_image?: string;
 }
 
 // Context type
@@ -49,7 +49,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await fetch('http://localhost:3001/api/user/me?user_id=1', {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${accessToken}`
         }
       });

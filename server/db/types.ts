@@ -4,6 +4,7 @@ export interface UserSchema {
   email: string;
   password: string;
   phone: string;
+  profile_image?: string;
   created_at: string;
   updated_at: string;
 }

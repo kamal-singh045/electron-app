@@ -16,10 +16,10 @@ export const getUserByEmail = (email: string): UserSchema => {
   return result;
 }
 
-export const getUserById = (id: number) => {
+export const getUserById = (id: number): UserSchema => {
   const db = getDbInstance();
   const statement = db.prepare('SELECT * FROM users WHERE id = ?');
-  const result = statement.get(id);
+  const result = statement.get(id) as UserSchema;
   return result;
 }
 

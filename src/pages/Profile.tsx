@@ -2,12 +2,14 @@ import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/Profile.css';
 import { useAuth } from '../hooks/useAuth';
+import { FaCamera } from "react-icons/fa";
 
 export default function Profile() {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
-  const [profileImage, setProfileImage] = useState<string>('');
+  const [image, setImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showUploadOptions, setShowUploadOptions] = useState(false);
@@ -32,25 +34,23 @@ export default function Profile() {
       video.play();
 
       // Wait for video to be ready
-      await new Promise((resolve) => {
-        video.onloadedmetadata = resolve;
-      });
+      await new Promise((resolve) => (video.onloadedmetadata = resolve));
 
       // Create canvas to capture frame
       const canvas = document.createElement('canvas');
       canvas.width = 640;
       canvas.height = 480;
       const ctx = canvas.getContext('2d');
-
-      if (ctx) {
-        ctx.drawImage(video, 0, 0, 640, 480);
-        const imageData = canvas.toDataURL('image/jpeg', 0.8);
-        // Stop the camera stream
-        stream.getTracks().forEach(track => track.stop());
-
-        // Save the image
-        await saveProfileImage(imageData);
-      }
+      if (!ctx) return;
+      ctx.drawImage(video, 0, 0);
+      stream.getTracks().forEach(track => track.stop());
+      const blob: Blob = await new Promise(resolve =>
+        canvas.toBlob(b => resolve(b!), 'image/jpeg', 0.85)
+      );
+      const file = new File([blob], 'profile.jpg', { type: 'image/jpeg' });
+      setImage(file);
+      setImagePreview(URL.createObjectURL(file));
+      // await saveProfileImage(file);
     } catch (err) {
       console.error('Camera error:', err);
       if (err instanceof Error) {
@@ -75,46 +75,37 @@ export default function Profile() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      setError('Please select a valid image file');
-      return;
-    }
-
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      setError('Image size should be less than 5MB');
-      return;
-    }
-
-    // Read and convert to base64
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      const imageData = event.target?.result as string;
-      await saveProfileImage(imageData);
-    };
-    reader.readAsDataURL(file);
+    setImage(file);
+    setImagePreview(URL.createObjectURL(file));
   };
 
-  const saveProfileImage = async (imageData: string) => {
-    console.log({ imageURL: imageData });
+  const saveProfileImage = async () => {
+    const accessToken = localStorage.getItem('accessToken');
+    if (!image) return;
     setLoading(true);
+    const formData = new FormData();
+    formData.append('file', image);
     try {
-      setProfileImage(imageData);
+      const response = await fetch('http://localhost:3001/api/user/me/upload-profile', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        },
+        body: formData
+      });
 
-      // console.log('Profile image saved successfully');
+      if (!response.ok) {
+        throw new Error('Failed to save profile image');
+      }
+      const res = await response.json();
+
+      console.log(res.message);
     } catch (err) {
       setError('Failed to save profile image');
       console.error('Save image error:', err);
     } finally {
       setLoading(false);
     }
-  };
-
-  const removeProfileImage = () => {
-    if (!user) return;
-    setProfileImage('');
-    // TODO: Remove from server via API
   };
 
   if (!user) {
@@ -134,32 +125,31 @@ export default function Profile() {
         <div className="profile-content">
           <div className="profile-image-section">
             <div className="profile-image-wrapper">
-              {profileImage ? (
-                <img src={profileImage} alt="Profile" className="profile-image" />
+              {(imagePreview || user.profile_image) ? (
+                <img src={imagePreview || user.profile_image} alt="Profile" className="profile-image" />
               ) : (
                 <div className="profile-image-placeholder">
                   <span>{user.name.charAt(0).toUpperCase()}</span>
                 </div>
               )}
+              <button
+                onClick={() => setShowUploadOptions(!showUploadOptions)}
+                className='profile-image-camera-icon-button'>
+                <FaCamera />
+              </button>
             </div>
 
             <div className="image-actions">
-              <button
-                onClick={() => setShowUploadOptions(!showUploadOptions)}
-                className="upload-button"
-                disabled={loading}
-              >
-                {loading ? 'Uploading...' : profileImage ? 'Change Photo' : 'Upload Photo'}
-              </button>
-
-              {profileImage && (
-                <button
-                  onClick={removeProfileImage}
-                  className="remove-button"
-                  disabled={loading}
-                >
-                  Remove Photo
-                </button>
+              {loading && <div className="loading">Uploading...</div>}
+              {(imagePreview) && (
+                <>
+                  <button
+                    onClick={saveProfileImage}
+                    className="remove-button"
+                  >
+                    Upload
+                  </button>
+                </>
               )}
 
               {showUploadOptions && (

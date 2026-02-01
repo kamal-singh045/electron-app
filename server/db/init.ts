@@ -9,19 +9,19 @@ export function getDbInstance(): Database.Database {
   if (!dbInstance) {
     // Use Electron's userData directory for the database
     // This ensures the database is stored in a proper location
-    const dbPath = app.isPackaged 
+    const dbPath = app.isPackaged
       ? path.join(app.getPath('userData'), 'database.sqlite')
       : path.join(process.cwd(), 'server', 'db', 'database.sqlite');
 
     // Create/connect to database
     dbInstance = new Database(dbPath);
-    
+
     // Enable foreign keys
     dbInstance.pragma('foreign_keys = ON');
-    
+
     console.log(`✅ Database connected at: ${dbPath}`);
   }
-  
+
   return dbInstance;
 }
 
@@ -40,6 +40,7 @@ export function initializeDatabase() {
         email TEXT UNIQUE NOT NULL,
         password TEXT NOT NULL,
         phone TEXT,
+        profile_image TEXT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )

@@ -1,6 +1,7 @@
 import { CustomRequest } from "../types";
-import { getUserById } from "../db/queries";
+import { getUserById, updateUser } from "../db/queries";
 import { Response } from "express";
+import { UserSchema } from "@/db/types";
 
 export const getMe = async (req: CustomRequest, res: Response) => {
   try {
@@ -13,10 +14,57 @@ export const getMe = async (req: CustomRequest, res: Response) => {
     if (!user) {
       throw new Error('User does not exist');
     }
+    const userProfileUrl = user.profile_image ? `http://localhost:3001/static/${user.profile_image}` : '';
+
     res.status(200).json({
       success: true,
       message: 'User profile fetched',
-      data: user
+      data: {
+        ...user,
+        profile_image: userProfileUrl
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    throw new Error('Failed to register user');
+  }
+};
+
+export const uploadProfileImage = async (req: CustomRequest, res: Response) => {
+  if (!req.file) {
+    return res.status(400).json({
+      success: false,
+      message: 'No file uploaded',
+    });
+  }
+  const userId = req.userId;
+  // now save the relative path of the image
+  const relativePath = `images/${req.file.filename}`;
+  updateUser(Number(userId), { profile_image: relativePath });
+
+  res.status(200).json({
+    success: true,
+    message: 'Profile image uploaded',
+  });
+}
+
+export const updateMe = async (req: CustomRequest, res: Response) => {
+  try {
+    const userId = req.userId;
+    const dataToUpdate: Partial<UserSchema> = req.body;
+    if (!userId) {
+      throw new Error('User id is required');
+    }
+    const user = getUserById(Number(userId));
+
+    if (!user) {
+      throw new Error('User does not exist');
+    }
+
+    updateUser(Number(userId), dataToUpdate);
+    res.status(200).json({
+      success: true,
+      message: 'User profile updated',
     });
 
   } catch (error) {
