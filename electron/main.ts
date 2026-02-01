@@ -13,7 +13,8 @@ import { setupPermissions } from './permissions'
 // │ │ └── preload.mjs
 // │
 // For development, use process.cwd(), for production use app.getAppPath()
-process.env.APP_ROOT = process.cwd()
+const isDev = !app.isPackaged;
+process.env.APP_ROOT = isDev ? process.cwd() : app.getAppPath();
 
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
 export const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
@@ -66,7 +67,7 @@ app.on('activate', () => {
 app.whenReady().then(async () => {
   // Setup permissions for camera and file access
   setupPermissions()
-  
+
   // Start Express server before creating window
   await startServer()
   createWindow()
