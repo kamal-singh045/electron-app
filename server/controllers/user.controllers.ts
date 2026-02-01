@@ -29,7 +29,7 @@ export const getMe = async (req: CustomRequest, res: Response) => {
     });
   } catch (error) {
     console.error(error);
-    throw new Error('Failed to register user');
+    throw new Error('Failed to get user');
   }
 };
 
@@ -89,6 +89,6 @@ export const updateMe = async (req: CustomRequest, res: Response) => {
 
   } catch (error) {
     console.error(error);
-    throw new Error('Failed to register user');
+    throw new Error('Failed to update user');
   }
 };

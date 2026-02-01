@@ -41,7 +41,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setIsLoading(true);
       const response = await fetchApi<IGetUserResponse>({
-        url: 'http://localhost:3001/api/user/me?user_id=1',
+        url: 'http://localhost:3001/api/user/me',
         method: 'GET',
       });
       console.log({ response });

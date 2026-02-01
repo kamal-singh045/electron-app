@@ -1,6 +1,7 @@
 import Database from 'better-sqlite3';
 import path from 'node:path';
 import { app } from 'electron';
+import { runMigrations } from './migration/migrate';
 
 let dbInstance: Database.Database | null = null;
 
@@ -40,11 +41,13 @@ export function initializeDatabase() {
         email TEXT UNIQUE NOT NULL,
         password TEXT NOT NULL,
         phone TEXT,
-        profile_image TEXT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )
     `);
+
+    // Run migrations
+    runMigrations(db);
     console.log('✅ Database initialized successfully');
   } catch (error) {
     console.error('❌ Database initialization error:', error)

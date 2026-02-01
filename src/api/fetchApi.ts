@@ -9,7 +9,8 @@ async function fetchApi<T>(values: IValues): Promise<T> {
   const response = await fetch(values.url, {
     method: values.method,
     headers: {
-      'Authorization': accessToken ? `Bearer ${accessToken}` : ''
+      'Authorization': accessToken ? `Bearer ${accessToken}` : '',
+      ...(values.body instanceof FormData ? {} : { 'Content-Type': 'application/json' })
     },
     ...(values.body ? { body: values.body instanceof FormData ? values.body : JSON.stringify(values.body) } : {})
   });

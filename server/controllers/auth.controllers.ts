@@ -1,5 +1,5 @@
 import { generateToken } from "../utils/jwt";
-import { createUser, getUserByEmail } from "../db/queries";
+import { createUser, getUserByEmail, updateUser } from "../db/queries";
 import { ILoginPayload, IRegisterPayload } from "../types";
 import { RequestHandler } from "express";
 
@@ -35,6 +35,8 @@ export const login: RequestHandler = async (req, res) => {
     }
     // will generate access token and send back later
     const accessToken = generateToken(isUserExist.id, isUserExist.email);
+    // update last_login_at in user table
+    updateUser(isUserExist.id, { last_login_at: new Date().toISOString() });
     res.status(200).json({
       success: true,
       message: 'User logged in successfully',
@@ -42,6 +44,6 @@ export const login: RequestHandler = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    throw new Error('Failed to register user');
+    throw new Error('Failed to login user');
   }
 };
