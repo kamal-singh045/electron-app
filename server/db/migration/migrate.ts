@@ -1,7 +1,8 @@
 import Database from 'better-sqlite3';
 import * as m0001 from './migrations/0001_add_last_login_at';
+import * as m0002 from './migrations/0002_add_profile_image_column';
 
-const migrations = [m0001];
+const migrations = [m0001, m0002];
 
 export function runMigrations(db: Database.Database) {
   db.exec(`
