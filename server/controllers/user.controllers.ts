@@ -1,7 +1,7 @@
 import { CustomRequest } from "../types";
 import { getUserById, updateUser } from "../db/queries";
 import { Response } from "express";
-import { UserSchema } from "@/db/types";
+import { UserSchema } from "../db/types";
 import fs from 'node:fs';
 import path from 'node:path';
 import { app } from 'electron';

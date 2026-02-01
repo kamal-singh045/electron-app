@@ -29,6 +29,7 @@ export function setupPermissions() {
   // Handle permission check
   session.defaultSession.setPermissionCheckHandler((webContents, permission, requestingOrigin) => {
     console.log(`Permission check: ${permission} from ${requestingOrigin}`);
+    console.log(webContents?.userAgent);
 
     // Allow camera and microphone
     if (permission === 'media' || permission === 'mediaKeySystem') {
