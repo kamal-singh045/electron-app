@@ -3,11 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import '../styles/Profile.css';
 import { useAuth } from '../hooks/useAuth';
 import { FaCamera } from "react-icons/fa";
+import fetchApi from '../api/fetchApi';
+import { IUploadProfileResponse } from '../api/types';
 
 export default function Profile() {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -50,7 +52,6 @@ export default function Profile() {
       const file = new File([blob], 'profile.jpg', { type: 'image/jpeg' });
       setImage(file);
       setImagePreview(URL.createObjectURL(file));
-      // await saveProfileImage(file);
     } catch (err) {
       console.error('Camera error:', err);
       if (err instanceof Error) {
@@ -80,26 +81,19 @@ export default function Profile() {
   };
 
   const saveProfileImage = async () => {
-    const accessToken = localStorage.getItem('accessToken');
     if (!image) return;
     setLoading(true);
     const formData = new FormData();
     formData.append('file', image);
     try {
-      const response = await fetch('http://localhost:3001/api/user/me/upload-profile', {
+      const response = await fetchApi<IUploadProfileResponse>({
+        url: 'http://localhost:3001/api/user/me/upload-profile',
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`
-        },
         body: formData
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to save profile image');
-      }
-      const res = await response.json();
-
-      console.log(res.message);
+      console.log(response.message);
+      updateUser({ profile_image: response.data.profile_image });
+      setImagePreview(null);
     } catch (err) {
       setError('Failed to save profile image');
       console.error('Save image error:', err);

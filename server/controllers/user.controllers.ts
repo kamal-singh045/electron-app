@@ -2,6 +2,9 @@ import { CustomRequest } from "../types";
 import { getUserById, updateUser } from "../db/queries";
 import { Response } from "express";
 import { UserSchema } from "@/db/types";
+import fs from 'node:fs';
+import path from 'node:path';
+import { app } from 'electron';
 
 export const getMe = async (req: CustomRequest, res: Response) => {
   try {
@@ -40,11 +43,28 @@ export const uploadProfileImage = async (req: CustomRequest, res: Response) => {
   const userId = req.userId;
   // now save the relative path of the image
   const relativePath = `images/${req.file.filename}`;
+  // first get the old profile_image and delete if exists
+  const user = getUserById(Number(userId));
+  if (user.profile_image) {
+    const oldRelativePath = user.profile_image;
+    const oldAbsolutePath = path.join(app.getPath('userData'), oldRelativePath);
+    try {
+      if (fs.existsSync(oldAbsolutePath)) {
+        fs.unlinkSync(oldAbsolutePath);
+        console.log('🗑️ Old profile image deleted');
+      }
+    } catch (error) {
+      console.error('Failed to delete old profile image:', error);
+    }
+  }
   updateUser(Number(userId), { profile_image: relativePath });
 
   res.status(200).json({
     success: true,
     message: 'Profile image uploaded',
+    data: {
+      profile_image: `http://localhost:3001/static/${relativePath}`
+    }
   });
 }
 

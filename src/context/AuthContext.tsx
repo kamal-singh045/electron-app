@@ -1,16 +1,10 @@
 import { createContext, ReactNode, useEffect, useState } from "react";
+import { IGetUserResponse, IUser } from "../api/types";
+import fetchApi from "../api/fetchApi";
 
 // Props for the Provider component
 interface AuthProviderProps {
   children: ReactNode;
-}
-
-interface IUser {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  profile_image?: string;
 }
 
 // Context type
@@ -19,6 +13,7 @@ interface AuthContextType {
   isLoading: boolean;
   error: string | null;
   fetchUser: () => Promise<void>;
+  updateUser: (details: Partial<IUser>) => void;
   logout: () => void;
 }
 
@@ -43,20 +38,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Function to fetch user data
   const fetchUser = async () => {
-    const accessToken = localStorage.getItem('accessToken');
     try {
       setIsLoading(true);
-      const response = await fetch('http://localhost:3001/api/user/me?user_id=1', {
+      const response = await fetchApi<IGetUserResponse>({
+        url: 'http://localhost:3001/api/user/me?user_id=1',
         method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`
-        }
       });
-
-      const res = await response.json();
-      console.log({ res });
-      if (response.ok) {
-        setUser(res.data);
+      console.log({ response });
+      if (response.success) {
+        setUser(response.data);
       }
     } catch (error) {
       setError('Network error. Please try again.');
@@ -66,12 +56,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const updateUser = (details: Partial<IUser>) => {
+    const updatedUser = { ...user, ...details } as IUser;
+    setUser(updatedUser);
+  }
+
   // The value provided to consuming components
   const contextValue: AuthContextType = {
     user,
     isLoading,
     error,
     fetchUser,
+    updateUser,
     logout,
   };
 

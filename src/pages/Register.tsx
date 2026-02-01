@@ -1,6 +1,8 @@
 import { useState, FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import '../styles/Auth.css';
+import { IRegisterResponse } from '../api/types';
+import fetchApi from '../api/fetchApi';
 
 interface RegisterFormData {
   name: string;
@@ -53,24 +55,18 @@ export default function Register() {
     setLoading(true);
 
     try {
-      // TODO: Replace with actual API call
-      const response = await fetch('http://localhost:3001/api/auth/register', {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { confirmPassword, ...restData } = formData; // Omit confirmPassword
+      const response = await fetchApi<IRegisterResponse>({
+        url: 'http://localhost:3001/api/auth/register',
         method: 'POST',
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          password: formData.password
-        }),
+        body: restData as unknown as Record<string, unknown>
       });
-
-      const res = await response.json();
-      console.log({ res });
-      if (response.ok) {
+      if (response.success) {
         // Registration successful, redirect to login
         navigate('/login', { state: { message: 'Registration successful! Please login.' } });
       } else {
-        setError(res.data.message || 'Registration failed');
+        setError(response.message || 'Registration failed');
       }
     } catch (err) {
       setError('Network error. Please try again.');

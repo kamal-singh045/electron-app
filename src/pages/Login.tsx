@@ -2,6 +2,8 @@ import { useState, FormEvent, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import '../styles/Auth.css';
 import { useAuth } from '../hooks/useAuth';
+import fetchApi from '../api/fetchApi';
+import { ILoginResponse } from '../api/types';
 
 interface LoginFormData {
   email: string;
@@ -49,22 +51,19 @@ export default function Login() {
     setLoading(true);
 
     try {
-      // TODO: Replace with actual API call
-      const response = await fetch('http://localhost:3001/api/auth/login', {
+      const response = await fetchApi<ILoginResponse>({
+        url: 'http://localhost:3001/api/auth/login',
         method: 'POST',
-        body: JSON.stringify(formData),
+        body: formData as unknown as Record<string, unknown>
       });
 
-      const res = await response.json();
-      console.log({ res });
-
-      if (response.ok) {
-        localStorage.setItem('accessToken', res.data.accessToken || '');
+      if (response.success) {
+        localStorage.setItem('accessToken', response.data.accessToken || '');
         await fetchUser();
         // Redirect to profile
         navigate('/profile');
       } else {
-        setError(res.data.message || 'Login failed');
+        setError(response.message || 'Login failed');
       }
     } catch (err) {
       setError('Network error. Please try again.');
