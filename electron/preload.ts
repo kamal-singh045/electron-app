@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ipcRenderer, contextBridge } from 'electron'
 
 // --------- Expose some API to the Renderer process ---------
@@ -21,4 +22,21 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
 
   // You can expose other APTs you need here.
   // ...
-})
+  login: async (payload: any) => {
+    return ipcRenderer.invoke('login', payload);
+  },
+  register: async (payload: any) => {
+    return ipcRenderer.invoke('register', payload);
+  },
+  getMyProfile: async () => {
+    return ipcRenderer.invoke('get-my-profile');
+  },
+  uploadProfileImage: async (file: File) => {
+    const buffer = await file.arrayBuffer();
+    return ipcRenderer.invoke('upload-profile-image', {
+      name: file.name,
+      type: file.type,
+      buffer
+    });
+  }
+});

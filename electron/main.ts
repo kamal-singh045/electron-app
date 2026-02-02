@@ -1,7 +1,14 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, ipcMain, protocol } from 'electron'
 import path from 'node:path'
 import { startServer } from '../server/server'
 import { setupPermissions } from './permissions'
+import {
+  loginHandler,
+  registerHandler,
+  uploadProfileImageHandler,
+  getMyProfileHandler
+} from '../server/ipcHandlers';
+import fs from 'node:fs/promises';
 
 // The built directory structure
 //
@@ -23,7 +30,9 @@ export const RENDERER_DIST = path.join(process.env.APP_ROOT, 'dist')
 
 process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, 'public') : RENDERER_DIST
 
-let win: BrowserWindow | null
+let win: BrowserWindow | null;
+
+let currentUserId: number | null = null;
 
 function createWindow() {
   win = new BrowserWindow({
@@ -49,6 +58,15 @@ function createWindow() {
   }
 }
 
+function registerFileProtocol() {
+  protocol.handle('app', async (request) => {
+    const url = request.url.replace('app://', ''); // Remove the 'app://' prefix if present
+    const filePath = path.join(app.getPath('userData'), url);
+    const data = await fs.readFile(filePath);
+    return new Response(data);
+  });
+}
+
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
@@ -69,9 +87,33 @@ app.on('activate', () => {
 
 app.whenReady().then(async () => {
   // Setup permissions for camera and file access
-  setupPermissions()
+  setupPermissions();
 
   // Start Express server before creating window
-  await startServer()
+  await startServer();
+
+  // Register file protocol: which will serve static files
+  registerFileProtocol();
+
+  // Setup IPC handlers
+  setupIpcHandlers();
+
   createWindow()
-})
+});
+
+// IPC Handlers
+function setupIpcHandlers() {
+  // Handle profile image upload
+  ipcMain.handle('get-my-profile', getMyProfileHandler);
+  ipcMain.handle('upload-profile-image', uploadProfileImageHandler);
+  ipcMain.handle('login', loginHandler);
+  ipcMain.handle('register', registerHandler);
+}
+
+export const setCurrentUser = (userId: number) => {
+  currentUserId = userId;
+};
+
+export const getCurrentUser = () => {
+  return currentUserId;
+};

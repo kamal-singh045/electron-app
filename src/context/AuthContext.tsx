@@ -1,7 +1,8 @@
 import { createContext, ReactNode, useEffect, useState } from "react";
-import { IGetUserResponse, IUser } from "../api/types";
-import fetchApi from "../api/fetchApi";
-import { config } from "../config/config";
+import { IUser } from "../api/types";
+// import { IGetUserResponse, IUser } from "../api/types";
+// import fetchApi from "../api/fetchApi";
+// import { config } from "../config/config";
 
 // Props for the Provider component
 interface AuthProviderProps {
@@ -41,10 +42,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const fetchUser = async () => {
     try {
       setIsLoading(true);
-      const response = await fetchApi<IGetUserResponse>({
-        url: `${config.apiUrl}/user/me`,
-        method: 'GET',
-      });
+      // const response = await fetchApi<IGetUserResponse>({
+      //   url: `${config.apiUrl}/user/me`,
+      //   method: 'GET',
+      // });
+      const response = await window.ipcRenderer.getMyProfile();
       console.log({ response });
       if (response.success) {
         setUser(response.data);

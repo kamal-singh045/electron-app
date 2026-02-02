@@ -2,9 +2,10 @@ import { useState, FormEvent, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import '../styles/Auth.css';
 import { useAuth } from '../hooks/useAuth';
-import fetchApi from '../api/fetchApi';
-import { ILoginResponse } from '../api/types';
-import { config } from '../config/config';
+import { toast } from 'react-toastify';
+// import fetchApi from '../api/fetchApi';
+// import { ILoginResponse } from '../api/types';
+// import { config } from '../config/config';
 
 interface LoginFormData {
   email: string;
@@ -52,18 +53,21 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const response = await fetchApi<ILoginResponse>({
-        url: `${config.apiUrl}/auth/login`,
-        method: 'POST',
-        body: formData as unknown as Record<string, unknown>
-      });
+      // const response = await fetchApi<ILoginResponse>({
+      //   url: `${config.apiUrl}/auth/login`,
+      //   method: 'POST',
+      //   body: formData as unknown as Record<string, unknown>
+      // });
+      const response = await window.ipcRenderer.login(formData);
 
       if (response.success) {
-        localStorage.setItem('accessToken', response.data.accessToken || '');
+        // localStorage.setItem('accessToken', response.data.accessToken || '');
+        toast.success('Login successful!');
         await fetchUser();
         // Redirect to profile
         navigate('/profile');
       } else {
+        toast.error('Login failed. Please try again.');
         setError(response.message || 'Login failed');
       }
     } catch (err) {

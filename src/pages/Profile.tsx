@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import '../styles/Profile.css';
 import { useAuth } from '../hooks/useAuth';
 import { FaCamera } from "react-icons/fa";
-import fetchApi from '../api/fetchApi';
-import { IUploadProfileResponse } from '../api/types';
+import { toast } from 'react-toastify';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -83,17 +82,23 @@ export default function Profile() {
   const saveProfileImage = async () => {
     if (!image) return;
     setLoading(true);
-    const formData = new FormData();
-    formData.append('file', image);
+    // const formData = new FormData();
+    // formData.append('file', image);
     try {
-      const response = await fetchApi<IUploadProfileResponse>({
-        url: 'http://localhost:3001/api/user/me/upload-profile',
-        method: 'POST',
-        body: formData
-      });
+      // const response = await fetchApi<IUploadProfileResponse>({
+      //   url: 'http://localhost:3001/api/user/me/upload-profile',
+      //   method: 'POST',
+      //   body: formData
+      // });
+      const response = await window.ipcRenderer.uploadProfileImage(image);
       console.log(response.message);
-      updateUser({ profile_image: response.data.profile_image });
-      setImagePreview(null);
+      if (response.success) {
+        toast.success('Profile picture saved successfully!');
+        updateUser({ profile_image: response.data.profile_image });
+        setImagePreview(null);
+      } else {
+        toast.error('Failed to save profile image');
+      }
     } catch (err) {
       setError('Failed to save profile image');
       console.error('Save image error:', err);

@@ -1,9 +1,10 @@
 import { useState, FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import '../styles/Auth.css';
-import { IRegisterResponse } from '../api/types';
-import fetchApi from '../api/fetchApi';
-import { config } from '../config/config';
+import { toast } from 'react-toastify';
+// import { IRegisterResponse } from '../api/types';
+// import fetchApi from '../api/fetchApi';
+// import { config } from '../config/config';
 
 interface RegisterFormData {
   name: string;
@@ -58,15 +59,18 @@ export default function Register() {
     try {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { confirmPassword, ...restData } = formData; // Omit confirmPassword
-      const response = await fetchApi<IRegisterResponse>({
-        url: `${config.apiUrl}/auth/register`,
-        method: 'POST',
-        body: restData as unknown as Record<string, unknown>
-      });
+      // const response = await fetchApi<IRegisterResponse>({
+      //   url: `${config.apiUrl}/auth/register`,
+      //   method: 'POST',
+      //   body: restData as unknown as Record<string, unknown>
+      // });
+      const response = await window.ipcRenderer.register(restData);
       if (response.success) {
+        toast.success('Registration successful!');
         // Registration successful, redirect to login
         navigate('/login', { state: { message: 'Registration successful! Please login.' } });
       } else {
+        toast.error('Registration failed. Please try again.');
         setError(response.message || 'Registration failed');
       }
     } catch (err) {
