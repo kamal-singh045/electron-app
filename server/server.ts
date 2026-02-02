@@ -3,9 +3,9 @@ import cors from 'cors';
 import routes from './routes';
 import { initializeDatabase } from './db/init';
 import { app as electronApp } from 'electron';
+import { serverConfig } from './config/config';
 
 const app = express();
-const PORT = 3001;
 const userDataPath = electronApp.getPath('userData');
 
 // Middleware
@@ -26,8 +26,8 @@ export function startServer() {
       // Initialize database
       initializeDatabase()
 
-      app.listen(PORT, () => {
-        console.log(`✅ Express server running on http://localhost:${PORT}`)
+      app.listen(serverConfig.port, () => {
+        console.log(`✅ Express server running on http://localhost:${serverConfig.port}`)
         resolve()
       })
     } catch (error) {

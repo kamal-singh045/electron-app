@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import '../styles/Auth.css';
 import { IRegisterResponse } from '../api/types';
 import fetchApi from '../api/fetchApi';
+import { config } from '../config/config';
 
 interface RegisterFormData {
   name: string;
@@ -58,7 +59,7 @@ export default function Register() {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { confirmPassword, ...restData } = formData; // Omit confirmPassword
       const response = await fetchApi<IRegisterResponse>({
-        url: 'http://localhost:3001/api/auth/register',
+        url: `${config.apiUrl}/auth/register`,
         method: 'POST',
         body: restData as unknown as Record<string, unknown>
       });

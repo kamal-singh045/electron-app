@@ -5,6 +5,7 @@ import { UserSchema } from "../db/types";
 import fs from 'node:fs';
 import path from 'node:path';
 import { app } from 'electron';
+import { serverConfig } from "../config/config";
 
 export const getMe = async (req: CustomRequest, res: Response) => {
   try {
@@ -17,7 +18,7 @@ export const getMe = async (req: CustomRequest, res: Response) => {
     if (!user) {
       throw new Error('User does not exist');
     }
-    const userProfileUrl = user.profile_image ? `http://localhost:3001/static/${user.profile_image}` : '';
+    const userProfileUrl = user.profile_image ? `${serverConfig.apiUrl}/static/${user.profile_image}` : '';
 
     res.status(200).json({
       success: true,
@@ -42,7 +43,7 @@ export const uploadProfileImage = async (req: CustomRequest, res: Response) => {
   }
   const userId = req.userId;
   // now save the relative path of the image
-  const relativePath = `images/${req.file.filename}`;
+  const relativePath = `${serverConfig.imagesBaseDir}/${req.file.filename}`;
   // first get the old profile_image and delete if exists
   const user = getUserById(Number(userId));
   if (user.profile_image) {
@@ -63,7 +64,7 @@ export const uploadProfileImage = async (req: CustomRequest, res: Response) => {
     success: true,
     message: 'Profile image uploaded',
     data: {
-      profile_image: `http://localhost:3001/static/${relativePath}`
+      profile_image: `${serverConfig.apiUrl}/static/${relativePath}`
     }
   });
 }

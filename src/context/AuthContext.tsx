@@ -1,6 +1,7 @@
 import { createContext, ReactNode, useEffect, useState } from "react";
 import { IGetUserResponse, IUser } from "../api/types";
 import fetchApi from "../api/fetchApi";
+import { config } from "../config/config";
 
 // Props for the Provider component
 interface AuthProviderProps {
@@ -41,7 +42,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setIsLoading(true);
       const response = await fetchApi<IGetUserResponse>({
-        url: 'http://localhost:3001/api/user/me',
+        url: `${config.apiUrl}/user/me`,
         method: 'GET',
       });
       console.log({ response });

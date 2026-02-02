@@ -4,6 +4,7 @@ import '../styles/Auth.css';
 import { useAuth } from '../hooks/useAuth';
 import fetchApi from '../api/fetchApi';
 import { ILoginResponse } from '../api/types';
+import { config } from '../config/config';
 
 interface LoginFormData {
   email: string;
@@ -52,7 +53,7 @@ export default function Login() {
 
     try {
       const response = await fetchApi<ILoginResponse>({
-        url: 'http://localhost:3001/api/auth/login',
+        url: `${config.apiUrl}/auth/login`,
         method: 'POST',
         body: formData as unknown as Record<string, unknown>
       });
