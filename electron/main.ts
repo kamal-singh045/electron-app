@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, protocol } from 'electron'
+import { app, BrowserWindow, ipcMain, protocol, Tray, Menu } from 'electron'
 import path from 'node:path'
 import { startServer } from './server/server';
 import { setupPermissions } from './permissions'
@@ -31,8 +31,9 @@ export const RENDERER_DIST = path.join(process.env.APP_ROOT, 'dist')
 const VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, 'public') : RENDERER_DIST
 
 let win: BrowserWindow | null;
-
+let tray;
 let currentUserId: number | null = null;
+let isQuitting = false;
 
 function createWindow() {
   win = new BrowserWindow({
@@ -43,12 +44,19 @@ function createWindow() {
       nodeIntegration: false,
       contextIsolation: true,
     },
-  })
+  });
+
+  win.on('close', (e) => {
+    if (!isQuitting) {
+      e.preventDefault();
+      win?.hide();
+    }
+  });
 
   // Test active push message to Renderer-process.
   win.webContents.on('did-finish-load', () => {
     win?.webContents.send('main-process-message', (new Date).toLocaleString())
-  })
+  });
 
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL)
@@ -68,15 +76,46 @@ function registerFileProtocol() {
   });
 }
 
+// Setup Tray
+function setupTray() {
+  const iconPath = path.join(VITE_PUBLIC, 'tray-icon.png');
+  tray = new Tray(iconPath);
+  tray.setToolTip('ElectronApp');
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: 'Show',
+      click: () => {
+        if (win) {
+          win.show();
+          win.focus();
+        } else {
+          createWindow();
+        }
+      }
+    },
+    { type: 'separator' },
+    {
+      label: 'Quit',
+      click: () => {
+        isQuitting = true;
+        app.quit();
+      }
+    },
+  ]);
+  tray.setContextMenu(contextMenu);
+}
+
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
-    win = null
-  }
-})
+  // Do NOTHING here
+  // Keep app alive for tray (Windows + macOS + Linux)
+  // if (process.platform !== 'darwin') {
+  //   app.quit()
+  //   win = null
+  // }
+});
 
 app.on('activate', () => {
   // On OS X it's common to re-create a window in the app when the
@@ -84,9 +123,12 @@ app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow()
   }
-})
+});
 
 app.whenReady().then(async () => {
+  // Setup tray
+  setupTray();
+
   // Setup permissions for camera and file access
   setupPermissions();
 
@@ -99,7 +141,8 @@ app.whenReady().then(async () => {
   // Setup IPC handlers
   setupIpcHandlers();
 
-  createWindow()
+  // Create window
+  createWindow();
 });
 
 // IPC Handlers
