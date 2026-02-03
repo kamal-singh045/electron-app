@@ -1,10 +1,11 @@
 import { Request } from 'express';
 export * from './auth.types';
+export * from './user.types';
 
 export interface ApiResponse<T> {
-  success: boolean
-  message: string
-  data?: T
+  success: boolean;
+  message: string;
+  data?: T;
 }
 
 export interface CustomRequest extends Request {

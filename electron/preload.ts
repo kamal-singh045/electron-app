@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ipcRenderer, contextBridge } from 'electron'
+import { ApiResponse, ILoginPayload, IRegisterPayload, IUserResponse } from './server/types';
 
 // --------- Expose some API to the Renderer process ---------
 contextBridge.exposeInMainWorld('ipcRenderer', {
@@ -18,20 +19,21 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
   invoke(...args: Parameters<typeof ipcRenderer.invoke>) {
     const [channel, ...omit] = args
     return ipcRenderer.invoke(channel, ...omit)
-  },
+  }
+});
 
-  // You can expose other APTs you need here.
-  // ...
-  login: async (payload: any) => {
+// --------- Exposing some API to the Renderer process ---------
+contextBridge.exposeInMainWorld('electron', {
+  login: async (payload: ILoginPayload): Promise<ApiResponse<undefined>> => {
     return ipcRenderer.invoke('login', payload);
   },
-  register: async (payload: any) => {
+  register: async (payload: IRegisterPayload): Promise<ApiResponse<undefined>> => {
     return ipcRenderer.invoke('register', payload);
   },
-  getMyProfile: async () => {
+  getMyProfile: async (): Promise<ApiResponse<IUserResponse>> => {
     return ipcRenderer.invoke('get-my-profile');
   },
-  uploadProfileImage: async (file: File) => {
+  uploadProfileImage: async (file: File): Promise<ApiResponse<{ profile_image: string }>> => {
     const buffer = await file.arrayBuffer();
     return ipcRenderer.invoke('upload-profile-image', {
       name: file.name,

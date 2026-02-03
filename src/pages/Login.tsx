@@ -58,7 +58,7 @@ export default function Login() {
       //   method: 'POST',
       //   body: formData as unknown as Record<string, unknown>
       // });
-      const response = await window.ipcRenderer.login(formData);
+      const response = await window.electron.login(formData);
 
       if (response.success) {
         // localStorage.setItem('accessToken', response.data.accessToken || '');

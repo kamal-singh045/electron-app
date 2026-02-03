@@ -12,7 +12,7 @@ export function getDbInstance(): Database.Database {
     // This ensures the database is stored in a proper location
     const dbPath = app.isPackaged
       ? path.join(app.getPath('userData'), 'database.sqlite')
-      : path.join(process.cwd(), 'server', 'db', 'database.sqlite');
+      : path.join(process.cwd(), 'electron', 'server', 'db', 'database.sqlite');
 
     // Create/connect to database
     dbInstance = new Database(dbPath);

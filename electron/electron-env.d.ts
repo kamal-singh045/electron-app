@@ -1,4 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import {
+  LoginPayload,
+  RegisterPayload,
+  ApiResponse,
+  IUserResponse
+} from './server/types';
+
 /// <reference types="vite-plugin-electron/electron-env" />
 
 declare namespace NodeJS {
@@ -31,9 +38,18 @@ interface Window {
     invoke(...args: Parameters<import('electron').IpcRenderer['invoke']>): Promise<any>;
 
     // Custom APIs
-    login(payload: any): Promise<any>;
-    register(payload: any): Promise<any>;
-    getMyProfile(): Promise<any>;
-    uploadProfileImage(file: File): Promise<any>;
+  }
+}
+
+export interface ElectronAPI {
+  login(payload: LoginPayload): Promise<ApiResponse<undefined>>;
+  register(payload: RegisterPayload): Promise<ApiResponse<undefined>>;
+  getMyProfile(): Promise<ApiResponse<IUserResponse>>;
+  uploadProfileImage(file: File): Promise<ApiResponse<{ profile_image: string }>>;
+}
+
+declare global {
+  interface Window {
+    electron: ElectronAPI;
   }
 }

@@ -64,7 +64,7 @@ export default function Register() {
       //   method: 'POST',
       //   body: restData as unknown as Record<string, unknown>
       // });
-      const response = await window.ipcRenderer.register(restData);
+      const response = await window.electron.register(restData);
       if (response.success) {
         toast.success('Registration successful!');
         // Registration successful, redirect to login

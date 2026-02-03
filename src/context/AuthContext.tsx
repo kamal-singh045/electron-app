@@ -46,9 +46,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       //   url: `${config.apiUrl}/user/me`,
       //   method: 'GET',
       // });
-      const response = await window.ipcRenderer.getMyProfile();
+      const response = await window.electron.getMyProfile();
       console.log({ response });
-      if (response.success) {
+      if (response.success && response.data) {
         setUser(response.data);
       }
     } catch (error) {

@@ -1,13 +1,13 @@
 import { app, BrowserWindow, ipcMain, protocol } from 'electron'
 import path from 'node:path'
-import { startServer } from '../server/server'
+import { startServer } from './server/server';
 import { setupPermissions } from './permissions'
 import {
   loginHandler,
   registerHandler,
   uploadProfileImageHandler,
   getMyProfileHandler
-} from '../server/ipcHandlers';
+} from './server/ipcHandlers';
 import fs from 'node:fs/promises';
 
 // The built directory structure
@@ -28,7 +28,7 @@ export const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
 export const MAIN_DIST = path.join(process.env.APP_ROOT, 'dist-electron')
 export const RENDERER_DIST = path.join(process.env.APP_ROOT, 'dist')
 
-process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, 'public') : RENDERER_DIST
+const VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, 'public') : RENDERER_DIST
 
 let win: BrowserWindow | null;
 
@@ -36,7 +36,7 @@ let currentUserId: number | null = null;
 
 function createWindow() {
   win = new BrowserWindow({
-    icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
+    icon: path.join(VITE_PUBLIC, 'electron-vite.svg'),
     webPreferences: {
       preload: path.join(MAIN_DIST, 'preload.mjs'),
       sandbox: true,
@@ -58,6 +58,7 @@ function createWindow() {
   }
 }
 
+// Register file protocol
 function registerFileProtocol() {
   protocol.handle('app', async (request) => {
     const url = request.url.replace('app://', ''); // Remove the 'app://' prefix if present
@@ -110,10 +111,10 @@ function setupIpcHandlers() {
   ipcMain.handle('register', registerHandler);
 }
 
+// Helper functions
 export const setCurrentUser = (userId: number) => {
   currentUserId = userId;
 };
-
 export const getCurrentUser = () => {
   return currentUserId;
 };

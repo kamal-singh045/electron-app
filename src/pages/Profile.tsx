@@ -90,11 +90,11 @@ export default function Profile() {
       //   method: 'POST',
       //   body: formData
       // });
-      const response = await window.ipcRenderer.uploadProfileImage(image);
+      const response = await window.electron.uploadProfileImage(image);
       console.log(response.message);
       if (response.success) {
         toast.success('Profile picture saved successfully!');
-        updateUser({ profile_image: response.data.profile_image });
+        updateUser({ profile_image: response.data?.profile_image });
         setImagePreview(null);
       } else {
         toast.error('Failed to save profile image');
