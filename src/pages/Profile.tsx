@@ -11,16 +11,22 @@ export default function Profile() {
   const { user, updateUser } = useAuth();
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [showCameraModal, setShowCameraModal] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null); // Ref to hold the MediaStream
+  const [cameraLoading, setCameraLoading] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [showUploadOptions, setShowUploadOptions] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleLogout = () => {
     navigate('/login');
   };
 
-  const handleCameraCapture = async () => {
+  const handleOpenCamera = async () => {
+    setShowCameraModal(true);
     setShowUploadOptions(false);
+    setCameraLoading(true);
     setError('');
 
     try {
@@ -28,29 +34,11 @@ export default function Profile() {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { width: 640, height: 480 }
       });
-
-      // Create a video element to capture the frame
-      const video = document.createElement('video');
-      video.srcObject = stream;
-      video.play();
-
-      // Wait for video to be ready
-      await new Promise((resolve) => (video.onloadedmetadata = resolve));
-
-      // Create canvas to capture frame
-      const canvas = document.createElement('canvas');
-      canvas.width = 640;
-      canvas.height = 480;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-      ctx.drawImage(video, 0, 0);
-      stream.getTracks().forEach(track => track.stop());
-      const blob: Blob = await new Promise(resolve =>
-        canvas.toBlob(b => resolve(b!), 'image/jpeg', 0.85)
-      );
-      const file = new File([blob], 'profile.jpg', { type: 'image/jpeg' });
-      setImage(file);
-      setImagePreview(URL.createObjectURL(file));
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
+      }
     } catch (err) {
       console.error('Camera error:', err);
       if (err instanceof Error) {
@@ -62,8 +50,29 @@ export default function Profile() {
           setError('Failed to access camera: ' + err.message);
         }
       }
+    } finally {
+      setCameraLoading(false);
     }
   };
+
+  const handleCaptureImage = async () => {
+    if (!videoRef.current) return;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 640;
+    canvas.height = 480;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+    const blob: Blob = await new Promise<Blob>(resolve =>
+      canvas.toBlob(b => resolve(b!), 'image/jpeg', 0.85)
+    );
+    const file = new File([blob], 'profile.jpg', { type: 'image/jpeg' });
+    setImage(file);
+    setImagePreview(URL.createObjectURL(file));
+    closeCamera();
+  }
 
   const handleFileSelect = () => {
     setShowUploadOptions(false);
@@ -105,6 +114,12 @@ export default function Profile() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const closeCamera = () => {
+    streamRef.current?.getTracks().forEach(track => track.stop());
+    streamRef.current = null;
+    setShowCameraModal(false);
   };
 
   if (!user) {
@@ -153,7 +168,7 @@ export default function Profile() {
 
               {showUploadOptions && (
                 <div className="upload-options">
-                  <button onClick={handleCameraCapture} className="option-button">
+                  <button onClick={handleOpenCamera} className="option-button">
                     📷 Take Photo
                   </button>
                   <button onClick={handleFileSelect} className="option-button">
@@ -190,6 +205,26 @@ export default function Profile() {
           </div>
         </div>
       </div>
+      {showCameraModal && (
+        <div className="camera-modal">
+          <div className="bg-white p-4 rounded-md">
+            {cameraLoading && <div className="flex items-center justify-center">Loading...</div>}
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              width={640}
+              height={480}
+            />
+
+            <div className="flex justify-between items-center mt-8">
+              <button className='bg-blue-600 text-white rounded-md px-3 py-1' onClick={handleCaptureImage}>📸 Capture</button>
+              <button className='bg-transparent text-black rounded-md border border-black px-3 py-1' onClick={closeCamera}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

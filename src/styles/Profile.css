@@ -229,3 +229,20 @@
   font-size: 14px;
   margin-bottom: 20px;
 }
+
+.camera-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+/* .camera-content {
+  background: #fff;
+  maxHe
+  padding: 16px;
+  border-radius: 8px;
+} */
