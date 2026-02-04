@@ -3,7 +3,7 @@
  */
 {
   "appId": "com.electron.app",
-  "productName": "Electron App",
+  "productName": "ElectronApp",
   "directories": {
     "buildResources": "build"
   },
@@ -13,8 +13,11 @@
   ],
   "mac": {
     "target": ["dmg", "zip"],
+    "identity": null, // Forces electron-builder to skip signing
     "category": "public.app-category.utilities",
     "icon": "build/icon.icns",
+    "entitlements": "build/entitlements.mac.plist",
+    "entitlementsInherit": "build/entitlements.mac.plist",
     "extendInfo": {
       "NSCameraUsageDescription": "This app requires access to the camera to capture profile pictures.",
       "NSMicrophoneUsageDescription": "This app requires access to the microphone for video calls."

@@ -24,26 +24,32 @@ export default function Profile() {
   };
 
   const handleOpenCamera = async () => {
-    setShowCameraModal(true);
     setShowUploadOptions(false);
     setCameraLoading(true);
     setError('');
 
     try {
-      // Request camera permissions and capture
+      // Request camera permissions and capture BEFORE showing modal
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { width: 640, height: 480 }
       });
       streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-      }
+      
+      // Only show modal after we have the stream
+      setShowCameraModal(true);
+      
+      // Wait for next render cycle to ensure video element is in DOM
+      setTimeout(() => {
+        if (videoRef.current && streamRef.current) {
+          videoRef.current.srcObject = streamRef.current;
+        }
+      }, 100);
+      
     } catch (err) {
       console.error('Camera error:', err);
       if (err instanceof Error) {
         if (err.name === 'NotAllowedError') {
-          setError('Camera permission denied. Please enable camera access in system settings.');
+          setError('Camera access is blocked. Go to System Settings → Privacy & Security → Camera and enable it for this app.');
         } else if (err.name === 'NotFoundError') {
           setError('No camera found on this device.');
         } else {
