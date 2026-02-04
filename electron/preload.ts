@@ -40,5 +40,8 @@ contextBridge.exposeInMainWorld('electron', {
       type: file.type,
       buffer
     });
+  },
+  setDockProgress: (progress: number): Promise<void> => {
+    return ipcRenderer.invoke('set-dock-progress', progress);
   }
 });

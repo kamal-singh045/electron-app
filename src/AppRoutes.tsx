@@ -3,6 +3,7 @@ import { useAuth } from "./hooks/useAuth";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
+import Home from "./pages/Home";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -25,13 +26,20 @@ export function AppRoutes() {
       <Route
         path="/"
         element={
-          user ? <Navigate to="/profile" replace /> : <Navigate to="/login" replace />
+          user ? <Navigate to="/home" replace /> : <Navigate to="/login" replace />
         }
       />
 
       <Route path="/register" element={<Register />} />
       <Route path="/login" element={<Login />} />
-
+      <Route
+        path="/home"
+        element={
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/profile"
         element={

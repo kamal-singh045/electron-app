@@ -6,7 +6,8 @@ import {
   loginHandler,
   registerHandler,
   uploadProfileImageHandler,
-  getMyProfileHandler
+  getMyProfileHandler,
+  setDockProgressHandler
 } from './server/ipcHandlers';
 import fs from 'node:fs/promises';
 
@@ -152,6 +153,7 @@ function setupIpcHandlers() {
   ipcMain.handle('upload-profile-image', uploadProfileImageHandler);
   ipcMain.handle('login', loginHandler);
   ipcMain.handle('register', registerHandler);
+  ipcMain.handle('set-dock-progress', (_event, progress) => setDockProgressHandler(win, progress));
 }
 
 // Helper functions

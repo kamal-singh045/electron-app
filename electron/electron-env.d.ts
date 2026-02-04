@@ -46,6 +46,7 @@ export interface ElectronAPI {
   register(payload: RegisterPayload): Promise<ApiResponse<undefined>>;
   getMyProfile(): Promise<ApiResponse<IUserResponse>>;
   uploadProfileImage(file: File): Promise<ApiResponse<{ profile_image: string }>>;
+  setDockProgress(progress: number): Promise<void>;
 }
 
 declare global {

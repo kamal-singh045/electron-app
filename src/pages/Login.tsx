@@ -65,7 +65,7 @@ export default function Login() {
         toast.success('Login successful!');
         await fetchUser();
         // Redirect to profile
-        navigate('/profile');
+        navigate('/home');
       } else {
         toast.error('Login failed. Please try again.');
         setError(response.message || 'Login failed');
