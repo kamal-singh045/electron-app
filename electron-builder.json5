@@ -3,9 +3,11 @@
  */
 {
   "appId": "com.electron.app",
+  "asar": true,
   "productName": "ElectronApp",
   "directories": {
-    "buildResources": "build"
+    "buildResources": "build",
+    "output": "release/${version}"
   },
   "files": [
     "dist",
@@ -18,9 +20,13 @@
     "icon": "build/icon.icns",
     "entitlements": "build/entitlements.mac.plist",
     "entitlementsInherit": "build/entitlements.mac.plist",
+    "hardenedRuntime": false, // true for production
+    "gatekeeperAssess": false, // true for production
     "extendInfo": {
       "NSCameraUsageDescription": "This app requires access to the camera to capture profile pictures.",
-      "NSMicrophoneUsageDescription": "This app requires access to the microphone for video calls."
+      "NSMicrophoneUsageDescription": "This app requires access to the microphone for video calls.",
+      "com.apple.security.device.audio-input": true,
+      "com.apple.security.device.camera": true
     }
   },
   "win": {

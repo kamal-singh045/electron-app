@@ -34,17 +34,16 @@ export default function Profile() {
         video: { width: 640, height: 480 }
       });
       streamRef.current = stream;
-      
+
       // Only show modal after we have the stream
       setShowCameraModal(true);
-      
-      // Wait for next render cycle to ensure video element is in DOM
       setTimeout(() => {
         if (videoRef.current && streamRef.current) {
           videoRef.current.srcObject = streamRef.current;
+          videoRef.current.play().catch(err => console.error('Camera play error:', err));
         }
-      }, 100);
-      
+      }, 400);
+
     } catch (err) {
       console.error('Camera error:', err);
       if (err instanceof Error) {

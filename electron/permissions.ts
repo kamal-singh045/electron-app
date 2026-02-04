@@ -65,13 +65,13 @@ export function setupPermissions() {
     // Set permission request handler - automatically allow these permissions
     webContents.session.setPermissionRequestHandler((_webContents, permission, callback) => {
       // List of allowed permissions - OS will prompt user when needed
-      const allowedPermissions = ["media", "mediaKeySystem", "fullscreen", "notifications"];
+      const allowedPermissions = ["media", "mediaKeySystem", "fullscreen", "notifications", "display-capture", "fileSystem"];
       callback(allowedPermissions.includes(permission));
     });
 
     // Set permission check handler for checking existing permissions
     webContents.session.setPermissionCheckHandler((_webContents, permission) => {
-      const allowedPermissions = ["media", "mediaKeySystem", "fullscreen", "notifications"];
+      const allowedPermissions = ["media", "mediaKeySystem", "fullscreen", "notifications", "display-capture", "fileSystem"];
       return allowedPermissions.includes(permission);
     });
   });
