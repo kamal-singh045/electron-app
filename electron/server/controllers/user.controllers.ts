@@ -43,7 +43,7 @@ export const uploadProfileImage = async (req: CustomRequest, res: Response) => {
   }
   const userId = req.userId;
   // now save the relative path of the image
-  const relativePath = `${serverConfig.imagesBaseDir}/${req.file.filename}`;
+  const relativePath = `${serverConfig.profileImagesBaseDir}/${req.file.filename}`;
   // first get the old profile_image and delete if exists
   const user = getUserById(Number(userId));
   if (user.profile_image) {
