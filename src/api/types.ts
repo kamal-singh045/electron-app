@@ -31,3 +31,15 @@ export interface IUser {
 export interface IGetUserResponse extends ICommonFields {
   data: IUser
 }
+
+// Todos----------------------------------------------------------------------
+export interface ITodoResponse {
+  id: number;
+  user_id: number;
+  text: string;
+  completed: boolean;
+  image?: string;
+  completed_at?: string;
+  created_at: string;
+  updated_at: string;
+}

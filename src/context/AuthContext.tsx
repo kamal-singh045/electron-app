@@ -29,7 +29,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Function to handle user logout
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('accessToken');
+    localStorage.removeItem('userDetails');
     // In a real app, you might remove a token from localStorage here
   };
 
@@ -46,10 +46,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       //   url: `${config.apiUrl}/user/me`,
       //   method: 'GET',
       // });
+      const userData = localStorage.getItem('userDetails');
+      if (userData) {
+        setUser(JSON.parse(userData));
+        return;
+      }
       const response = await window.electron.getMyProfile();
-      console.log({ response });
       if (response.success && response.data) {
         setUser(response.data);
+        localStorage.setItem('userDetails', JSON.stringify(response.data));
       }
     } catch (error) {
       setError('Network error. Please try again.');

@@ -1,6 +1,7 @@
 import { Request } from 'express';
 export * from './auth.types';
 export * from './user.types';
+export * from './todo.types';
 
 export interface ApiResponse<T> {
   success: boolean;

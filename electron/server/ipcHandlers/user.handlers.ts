@@ -43,12 +43,12 @@ export const uploadProfileImageHandler = async (
       }
     }
     const { buffer, name } = payload;
-    const imagesDir = path.join(app.getPath('userData'), serverConfig.imagesBaseDir);
+    const imagesDir = path.join(app.getPath('userData'), serverConfig.profileImagesBaseDir);
     fs.mkdirSync(imagesDir, { recursive: true });
     const filename = `${Date.now()}-${name}`;
     const absolutePath = path.join(imagesDir, filename);
     fs.writeFileSync(absolutePath, Buffer.from(buffer));
-    const relativePath = `${serverConfig.imagesBaseDir}/${filename}`;
+    const relativePath = `${serverConfig.profileImagesBaseDir}/${filename}`;
 
     updateUser(userId, { profile_image: relativePath });
     return {

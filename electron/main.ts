@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, protocol, Tray, Menu } from 'electron'
+import { app, BrowserWindow, ipcMain, protocol } from 'electron'
 import path from 'node:path'
 import { startServer } from './server/server';
 import { setupPermissions } from './permissions'
@@ -7,7 +7,12 @@ import {
   registerHandler,
   uploadProfileImageHandler,
   getMyProfileHandler,
-  setDockProgressHandler
+  setDockProgressHandler,
+  takeScreenshotHandler,
+  createTodoHandler,
+  getAllTodosHandler,
+  updateTodoHandler,
+  deleteTodoHandler
 } from './server/ipcHandlers';
 import fs from 'node:fs/promises';
 
@@ -32,9 +37,9 @@ export const RENDERER_DIST = path.join(process.env.APP_ROOT, 'dist')
 const VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, 'public') : RENDERER_DIST
 
 let win: BrowserWindow | null;
-let tray;
+// let tray;
 let currentUserId: number | null = null;
-let isQuitting = false;
+// let isQuitting = false;
 
 function createWindow() {
   win = new BrowserWindow({
@@ -47,12 +52,12 @@ function createWindow() {
     },
   });
 
-  win.on('close', (e) => {
-    if (!isQuitting) {
-      e.preventDefault();
-      win?.hide();
-    }
-  });
+  // win.on('close', (e) => {
+  //   if (!isQuitting) {
+  //     e.preventDefault();
+  //     win?.hide();
+  //   }
+  // });
 
   // Test active push message to Renderer-process.
   win.webContents.on('did-finish-load', () => {
@@ -78,33 +83,33 @@ function registerFileProtocol() {
 }
 
 // Setup Tray
-function setupTray() {
-  const iconPath = path.join(VITE_PUBLIC, 'tray-icon.png');
-  tray = new Tray(iconPath);
-  tray.setToolTip('ElectronApp');
-  const contextMenu = Menu.buildFromTemplate([
-    {
-      label: 'Show',
-      click: () => {
-        if (win) {
-          win.show();
-          win.focus();
-        } else {
-          createWindow();
-        }
-      }
-    },
-    { type: 'separator' },
-    {
-      label: 'Quit',
-      click: () => {
-        isQuitting = true;
-        app.quit();
-      }
-    },
-  ]);
-  tray.setContextMenu(contextMenu);
-}
+// export function setupTray() {
+//   const iconPath = path.join(VITE_PUBLIC, 'tray-icon.png');
+//   tray = new Tray(iconPath);
+//   tray.setToolTip('ElectronApp');
+//   const contextMenu = Menu.buildFromTemplate([
+//     {
+//       label: 'Show',
+//       click: () => {
+//         if (win) {
+//           win.show();
+//           win.focus();
+//         } else {
+//           createWindow();
+//         }
+//       }
+//     },
+//     { type: 'separator' },
+//     {
+//       label: 'Quit',
+//       click: () => {
+//         // isQuitting = true;
+//         app.quit();
+//       }
+//     },
+//   ]);
+//   tray.setContextMenu(contextMenu);
+// }
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
@@ -128,7 +133,7 @@ app.on('activate', () => {
 
 app.whenReady().then(async () => {
   // Setup tray
-  setupTray();
+  // setupTray();
 
   // Setup permissions for camera and file access
   setupPermissions();
@@ -146,14 +151,21 @@ app.whenReady().then(async () => {
   createWindow();
 });
 
-// IPC Handlers
+
+// IPC Handlers 
 function setupIpcHandlers() {
-  // Handle profile image upload
   ipcMain.handle('get-my-profile', getMyProfileHandler);
   ipcMain.handle('upload-profile-image', uploadProfileImageHandler);
   ipcMain.handle('login', loginHandler);
   ipcMain.handle('register', registerHandler);
   ipcMain.handle('set-dock-progress', (_event, progress) => setDockProgressHandler(win, progress));
+  ipcMain.handle('take-screenshot', takeScreenshotHandler);
+
+  // Todos
+  ipcMain.handle('create-todo', createTodoHandler);
+  ipcMain.handle('get-all-todos', getAllTodosHandler);
+  ipcMain.handle('update-todo', updateTodoHandler);
+  ipcMain.handle('delete-todo', deleteTodoHandler);
 }
 
 // Helper functions

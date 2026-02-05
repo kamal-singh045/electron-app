@@ -3,7 +3,10 @@ import {
   LoginPayload,
   RegisterPayload,
   ApiResponse,
-  IUserResponse
+  IUserResponse,
+  ICreateTodoPayload,
+  ITodoResponse,
+  IUpdateTodoPayload
 } from './server/types';
 
 /// <reference types="vite-plugin-electron/electron-env" />
@@ -47,6 +50,13 @@ export interface ElectronAPI {
   getMyProfile(): Promise<ApiResponse<IUserResponse>>;
   uploadProfileImage(file: File): Promise<ApiResponse<{ profile_image: string }>>;
   setDockProgress(progress: number): Promise<void>;
+  takeScreenshot(): Promise<ApiResponse<{ screenshot: string }>>;
+
+  // Todos
+  createTodo(payload: ICreateTodoPayload): Promise<ApiResponse<undefined>>;
+  getAllTodos(): Promise<ApiResponse<ITodoResponse[]>>;
+  updateTodo(payload: Partial<IUpdateTodoPayload>): Promise<ApiResponse<undefined>>;
+  deleteTodo(id: number): Promise<ApiResponse<undefined>>;
 }
 
 declare global {

@@ -1,6 +1,5 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../styles/Profile.css';
 import { useAuth } from '../hooks/useAuth';
 import { FaCamera } from "react-icons/fa";
 import { toast } from 'react-toastify';
@@ -128,55 +127,79 @@ export default function Profile() {
   };
 
   if (!user) {
-    return <div className="loading">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen text-lg text-gray-600">
+        Loading...
+      </div>
+    );
   }
 
   return (
-    <div className="profile-container">
-      <div className="profile-card">
-        <div className="profile-header">
-          <h1>My Profile</h1>
-          <button onClick={handleLogout} className="logout-button">
+    <div className="flex items-center justify-center min-h-screen bg-linear-to-br from-indigo-500 via-purple-500 to-pink-500 p-5">
+      <div className="bg-white rounded-xl shadow-2xl p-10 w-full max-w-2xl">
+        <div className="flex justify-between items-center mb-8 pb-5 border-b-2 border-gray-100">
+          <h1 className="text-3xl font-bold text-gray-800">My Profile</h1>
+          <button
+            onClick={handleLogout}
+            className="px-5 py-2.5 bg-red-500 text-white rounded-lg text-sm font-semibold transition-colors hover:bg-red-600"
+          >
             Logout
           </button>
         </div>
-        {error && <div className="error-message">{error}</div>}
-        <div className="profile-content">
-          <div className="profile-image-section">
-            <div className="profile-image-wrapper">
+
+        {error && (
+          <div className="p-3 mb-5 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+            {error}
+          </div>
+        )}
+
+        <div className="flex flex-col gap-10">
+          <div className="flex flex-col items-center gap-5">
+            <div className="relative w-36 h-36 rounded-full border-4 border-indigo-500 shadow-lg">
               {(imagePreview || user.profile_image) ? (
-                <img src={imagePreview || user.profile_image} alt="Profile" className="profile-image" />
+                <img
+                  src={imagePreview || user.profile_image}
+                  alt="Profile"
+                  className="w-full h-full object-cover rounded-full"
+                />
               ) : (
-                <div className="profile-image-placeholder">
+                <div className="w-full h-full rounded-full bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-5xl font-bold text-white">
                   <span>{user.name.charAt(0).toUpperCase()}</span>
                 </div>
               )}
               <button
                 onClick={() => setShowUploadOptions(!showUploadOptions)}
-                className='profile-image-camera-icon-button'>
+                className="absolute right-0 bottom-0 bg-indigo-600 border border-white rounded-full p-2.5 text-white hover:bg-indigo-700 transition-colors"
+              >
                 <FaCamera />
               </button>
             </div>
 
-            <div className="image-actions">
-              {loading && <div className="loading">Uploading...</div>}
-              {(imagePreview) && (
-                <>
-                  <button
-                    onClick={saveProfileImage}
-                    className="remove-button"
-                  >
-                    Upload
-                  </button>
-                </>
+            <div className="flex flex-col items-center gap-2.5 relative">
+              {loading && (
+                <div className="text-gray-600 text-sm">Uploading...</div>
+              )}
+              {imagePreview && (
+                <button
+                  onClick={saveProfileImage}
+                  className="px-6 py-2.5 bg-linear-to-r from-indigo-500 to-purple-600 text-white rounded-lg text-sm font-semibold transition-all hover:shadow-lg hover:-translate-y-0.5"
+                >
+                  Upload
+                </button>
               )}
 
               {showUploadOptions && (
-                <div className="upload-options">
-                  <button onClick={handleOpenCamera} className="option-button">
+                <div className="flex flex-col gap-2 mt-2.5 bg-white border-2 border-gray-200 rounded-lg p-2.5 shadow-lg absolute top-full z-10 min-w-50">
+                  <button
+                    onClick={handleOpenCamera}
+                    className="px-4 py-3 bg-white text-gray-800 border border-gray-200 rounded-md text-sm transition-all hover:bg-gray-50 hover:border-indigo-500 text-left whitespace-nowrap"
+                  >
                     📷 Take Photo
                   </button>
-                  <button onClick={handleFileSelect} className="option-button">
+                  <button
+                    onClick={handleFileSelect}
+                    className="px-4 py-3 bg-white text-gray-800 border border-gray-200 rounded-md text-sm transition-all hover:bg-gray-50 hover:border-indigo-500 text-left whitespace-nowrap"
+                  >
                     🖼️ Choose from Files
                   </button>
                 </div>
@@ -192,28 +215,37 @@ export default function Profile() {
             />
           </div>
 
-          <div className="profile-info">
-            <div className="info-item">
-              <label>Name</label>
-              <p>{user.name}</p>
+          <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-2 p-4 bg-gray-50 rounded-lg">
+              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                Name
+              </label>
+              <p className="text-base text-gray-800 font-medium">{user.name}</p>
             </div>
 
-            <div className="info-item">
-              <label>Email</label>
-              <p>{user.email}</p>
+            <div className="flex flex-col gap-2 p-4 bg-gray-50 rounded-lg">
+              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                Email
+              </label>
+              <p className="text-base text-gray-800 font-medium">{user.email}</p>
             </div>
 
-            <div className="info-item">
-              <label>Phone</label>
-              <p>{user.phone}</p>
+            <div className="flex flex-col gap-2 p-4 bg-gray-50 rounded-lg">
+              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                Phone
+              </label>
+              <p className="text-base text-gray-800 font-medium">{user.phone}</p>
             </div>
           </div>
         </div>
       </div>
+
       {showCameraModal && (
-        <div className="camera-modal">
-          <div className="bg-white p-4 rounded-md">
-            {cameraLoading && <div className="flex items-center justify-center">Loading...</div>}
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-999">
+          <div className="bg-white p-4 rounded-lg">
+            {cameraLoading && (
+              <div className="flex items-center justify-center">Loading...</div>
+            )}
             <video
               ref={videoRef}
               autoPlay
@@ -221,11 +253,22 @@ export default function Profile() {
               muted
               width={640}
               height={480}
+              className="rounded-lg"
             />
 
-            <div className="flex justify-between items-center mt-8">
-              <button className='bg-blue-600 text-white rounded-md px-3 py-1' onClick={handleCaptureImage}>📸 Capture</button>
-              <button className='bg-transparent text-black rounded-md border border-black px-3 py-1' onClick={closeCamera}>Cancel</button>
+            <div className="flex justify-between items-center mt-4">
+              <button
+                className="bg-indigo-600 text-white rounded-lg px-4 py-2 font-semibold hover:bg-indigo-700 transition-colors"
+                onClick={handleCaptureImage}
+              >
+                📸 Capture
+              </button>
+              <button
+                className="bg-transparent text-gray-800 rounded-lg border border-gray-800 px-4 py-2 font-semibold hover:bg-gray-100 transition-colors"
+                onClick={closeCamera}
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>

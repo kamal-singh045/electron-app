@@ -3,6 +3,8 @@ dotenv.config();
 
 export const serverConfig = {
   port: process.env.PORT || 3000,
-  imagesBaseDir: process.env.IMAGES_BASE_DIR || 'images',
+  profileImagesBaseDir: process.env.PROFILE_IMAGES_BASE_DIR || 'profile_images',
+  todoImagesBaseDir: process.env.TODO_IMAGES_BASE_DIR || 'todo_images',
+  screenshotsDir: process.env.SCREENSHOTS_BASE_DIR || 'screenshots',
   apiUrl: process.env.API_URL || 'http://localhost:3000'
 }

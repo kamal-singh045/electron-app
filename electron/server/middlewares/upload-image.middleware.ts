@@ -3,7 +3,7 @@ import path from 'node:path';
 import multer from 'multer';
 import { serverConfig } from '../config/config';
 
-const uploadDir = path.join(app.getPath('userData'), serverConfig.imagesBaseDir);
+const uploadDir = path.join(app.getPath('userData'), serverConfig.profileImagesBaseDir);
 
 const storage = multer.diskStorage({
   destination: uploadDir,
